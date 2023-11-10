@@ -3,26 +3,31 @@ function calcular(event) {
   const peso = Number(document.getElementById('peso').value);
   const idade = Number(document.getElementById('idade').value);
   const altura = Number(document.getElementById('altura').value);
-  const genero = selecionaGeneroDaPessoa('genero');
+  const genero = selecionaGeneroDoUsuario('genero');
   const dados = calcTMB(peso, idade, altura, genero);
-  const dadosIMC= calcIMC(peso, altura);
+  const dadosIMC = calcIMC(peso, altura);
 
-  showResults(dados, dadosIMC);
+  mostrarResultados(dados, dadosIMC);
 };
 
-function showResults(dados, dadosIMC) {
-  const listResult = document.querySelectorAll('.result-item');
-  listResult.forEach((item, index) => item.innerHTML = Math.ceil(dados[index]));
+function mostrarResultados(dados, dadosIMC) {
+  document.querySelectorAll('.result-item').forEach((item, index) => {
+    item.innerHTML = Math.ceil(dados[0][index]);
+  });
+
+  document.querySelectorAll('.result-peso').forEach((item, index) => {
+    item.innerHTML = Math.ceil(dados[1][index]);
+  });
 
   document.getElementById('imc').innerHTML = Math.ceil(dadosIMC);
   document.getElementById('imc_classification').innerHTML = calcTabelaIMC(dadosIMC);
   document.getElementById('result-data').style.visibility = 'visible';
-}
+};
 
-function selecionaGeneroDaPessoa(id) {
+function selecionaGeneroDoUsuario(id) {
   const select = document.getElementById(id);
   return select.options[select.selectedIndex].value;
-}
+};
 
 /* função para calcular a taxa metabólica basal e o nível de calorias necessárias
 de acordo com a prática esportiva*/
@@ -39,14 +44,18 @@ function calcTMB(peso, idade, altura, genero) {
   const superAtivo = 1.9 * res;
   const ganharPeso = res + 450;
   const perderPeso = res - 450;
-  const resData = [basal, sedentario, exercicioLeve, moderado, ativo, superAtivo, ganharPeso, perderPeso];
+
+  const resData = [
+    [basal, sedentario, exercicioLeve, moderado, ativo, superAtivo],
+    [ganharPeso, perderPeso],
+  ];
   return resData;
 };
 
 function calcIMC(peso, altura) {
   if (peso <= 0 || altura <= 0) {
     return null;
-  }
+  };
 
   const alturaMetros = altura / 100;
   const imc = peso / (alturaMetros * alturaMetros);
@@ -54,4 +63,4 @@ function calcIMC(peso, altura) {
   return imc.toFixed(2);
 };
 
-module.exports = { calcIMC,calcTMB }
+module.exports = { calcIMC, calcTMB }
