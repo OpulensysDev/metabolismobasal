@@ -19,7 +19,7 @@ describe('calcIMC', () => {
   })
   test('aplicação que retorna o resultado dos calculos do TMB', () => {
     const tmb = calcTMB(70,21,171,'Masculino')
-    expect(tmb.ativo).toBe(2878.59375)
+    expect(tmb[0][4]).toBe(2878.59375)
   })
 
   test('aplicação que retorna o resultado das tabelas do IMC', () => {
