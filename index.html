@@ -1,142 +1,630 @@
 <!DOCTYPE html>
 <html lang="pt-br">
-
 <head>
   <meta charset="UTF-8" />
-  <link rel="icon" href="./public/images/favicon.png">
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
-  <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@500;700&display=swap" rel="stylesheet" />
-  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
-
-  <title>Calculadora de Taxa Metabólica Basal</title>
-
-  <link rel="stylesheet" type="text/css" href="public/styles/style.css" />
-  <link rel="icon" href="./public/images/favicon.png" />
-  
-  <script src="./public/scripts/scripts_PT.cjs"></script>
-  <script src="./public/scripts/scripts.cjs"></script>
-  <script src="./public/scripts/shared.js"></script>
+  <title>Calculadora de Taxa Metabólica Avançada</title>
+  <link rel="icon" href="https://cdn.jsdelivr.net/npm/@mdi/svg@7.2.96/svg/calculator.svg">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/@mdi/font@7.2.96/css/materialdesignicons.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/animate.css@4.1.1/animate.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/notyf@3.10.0/notyf.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/luxon@3.3.0/build/global/luxon.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/notyf@3.10.0/notyf.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/i18next@21.6.10/i18next.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@3.18.0/dist/tf.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/dayjs@1.11.7/dayjs.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lodash@4.17.21/lodash.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/moment@2.29.4/moment.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/numeral@2.0.6/min/numeral.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/decimal.js@10.4.3/decimal.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/validator@13.9.0/validator.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/uuid@9.0.0/dist/umd/uuid.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/js-cookie@3.0.5/dist/js.cookie.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/fuse.js@6.6.2/dist/fuse.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked@5.0.2/marked.min.js"></script>
+  <style>
+    body {
+      font-family: 'Roboto', sans-serif;
+      transition: background-color 0.3s, color 0.3s;
+    }
+    .custom-shadow {
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    .dark {
+      background-color: #1a202c;
+      color: #e2e8f0;
+    }
+    .dark .bg-white {
+      background-color: #2d3748;
+    }
+    .dark .text-gray-600 {
+      color: #a0aec0;
+    }
+    .dark .text-gray-700 {
+      color: #e2e8f0;
+    }
+    .dark .custom-shadow {
+      box-shadow: 0 4px 6px rgba(255, 255, 255, 0.1);
+    }
+  </style>
 </head>
+<body class="bg-gray-100">
+  <div class="container mx-auto px-4 py-8">
+    <header class="text-center mb-8">
+      <h1 class="text-4xl font-bold text-indigo-700 mb-2 animate__animated animate__fadeInDown" data-i18n="title">
+        Calculadora de Taxa Metabólica Avançada
+      </h1>
+      <p class="text-gray-600 animate__animated animate__fadeIn animate__delay-1s" data-i18n="subtitle">
+        Descubra sua taxa metabólica basal e muito mais!
+      </p>
+    </header>
 
-<body lang="pt-br" onload="Inicializar()">
-  <div class="lan-bar-top">
-    <div class="custom-dropdown">
-      <div class="dropdown-header">
-        <span>Idioma: </span>
-        <img src="./public/images/flag-br.png">
+    <div class="flex justify-between items-center mb-4">
+      <div>
+        <label for="language" class="mr-2" data-i18n="language">Idioma:</label>
+        <select id="language" class="rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+          <option value="pt-BR">Português</option>
+          <option value="en-US">English (USA)</option>
+          <option value="it-IT">Italiano</option>
+          <option value="es-ES">Español</option>
+        </select>
       </div>
-      <ul class="dropdown-list">
-        <li><a href="./index.html" target="_blank" title="Português (Brasil)"><img class="flag"
-              src="./public/images/flag-br.png"></a></li>
-        <li><a href="./public/pages/index_ES.html" target="_blank" title="Espanhol"><img class="flag"
-              src="./public/images/flag-es.png"></a></li>
-        <li><a href="./public/pages/index_it.html" target="_blank" title="Italiano"><img class="flag"
-              src="./public/images/flag-it.png"></a></li>
-        <li><a href="./public/pages/index_en.html" target="_blank" title="Inglês"><img class="flag"
-              src="./public/images/flag-us.png"></a></li>
-      </ul>
+      <button id="darkModeToggle" class="bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-50 transition duration-200">
+        <span class="mdi mdi-weather-night"></span> <span data-i18n="darkMode">Modo Escuro</span>
+      </button>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+      <div class="bg-white rounded-lg p-6 custom-shadow animate__animated animate__fadeInLeft">
+        <h2 class="text-2xl font-semibold mb-4 text-indigo-600" data-i18n="personalData">Dados Pessoais</h2>
+        <form id="metabolicForm" class="space-y-4">
+          <div>
+            <label for="gender" class="block text-sm font-medium text-gray-700" data-i18n="gender">Sexo</label>
+            <select id="gender" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+              <option value="female" data-i18n="female">Feminino</option>
+              <option value="male" data-i18n="male">Masculino</option>
+            </select>
+          </div>
+          <div>
+            <label for="age" class="block text-sm font-medium text-gray-700" data-i18n="age">Idade</label>
+            <input type="number" id="age" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" required>
+          </div>
+          <div>
+            <label for="weight" class="block text-sm font-medium text-gray-700" data-i18n="weight">Peso (kg)</label>
+            <input type="number" id="weight" step="0.1" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" required>
+          </div>
+          <div>
+            <label for="height" class="block text-sm font-medium text-gray-700" data-i18n="height">Altura (cm)</label>
+            <input type="number" id="height" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" required>
+          </div>
+          <div>
+            <label for="activityLevel" class="block text-sm font-medium text-gray-700" data-i18n="activityLevel">Nível de Atividade</label>
+            <select id="activityLevel" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+              <option value="1.2" data-i18n="sedentary">Sedentário</option>
+              <option value="1.375" data-i18n="lightlyActive">Levemente Ativo</option>
+              <option value="1.55" data-i18n="moderatelyActive">Moderadamente Ativo</option>
+              <option value="1.725" data-i18n="veryActive">Muito Ativo</option>
+              <option value="1.9" data-i18n="extremelyActive">Extremamente Ativo</option>
+            </select>
+          </div>
+          <button type="submit" class="w-full bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-50 transition duration-200" data-i18n="calculate">
+            Calcular
+          </button>
+        </form>
+      </div>
+
+      <div class="bg-white rounded-lg p-6 custom-shadow animate__animated animate__fadeInRight">
+        <h2 class="text-2xl font-semibold mb-4 text-indigo-600" data-i18n="results">Resultados</h2>
+        <div id="results" class="space-y-4">
+          <p class="text-gray-600" data-i18n="fillForm">Preencha o formulário para ver seus resultados.</p>
+        </div>
+        <div class="mt-8">
+          <canvas id="caloriesChart"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <div class="mt-8 grid grid-cols-1 md:grid-cols-2 gap-8">
+      <div class="bg-white rounded-lg p-6 custom-shadow animate__animated animate__fadeInUp">
+        <h2 class="text-2xl font-semibold mb-4 text-indigo-600" data-i18n="macronutrients">Macronutrientes Recomendados</h2>
+        <div id="macronutrients" class="space-y-4">
+          <p class="text-gray-600" data-i18n="calculateFirst">Calcule sua taxa metabólica para ver as recomendações de macronutrientes.</p>
+        </div>
+        <div class="mt-8">
+          <div id="macroChart"></div>
+        </div>
+      </div>
+
+      <div class="bg-white rounded-lg p-6 custom-shadow animate__animated animate__fadeInUp">
+        <h2 class="text-2xl font-semibold mb-4 text-indigo-600" data-i18n="history">Histórico de Cálculos</h2>
+        <div id="history" class="space-y-4">
+          <p class="text-gray-600" data-i18n="noHistory">Seu histórico de cálculos aparecerá aqui.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="mt-8 bg-white rounded-lg p-6 custom-shadow animate__animated animate__fadeInUp">
+      <h2 class="text-2xl font-semibold mb-4 text-indigo-600" data-i18n="trends">Tendências e Previsões</h2>
+      <div id="trendsChart"></div>
+    </div>
+
+    <div class="mt-8 bg-white rounded-lg p-6 custom-shadow animate__animated animate__fadeInUp">
+      <h2 class="text-2xl font-semibold mb-4 text-indigo-600" data-i18n="information">Informações Nutricionais</h2>
+      <div id="nutritionInfo" class="prose"></div>
     </div>
   </div>
 
-  <header>
-    <img src="./public/images/calcCal.png" alt="calorias" class="logo" />
-    <h1 class="title beauty-shadow">Calculadora Taxa Metabólica Basal</h1>
-  </header>
+  <script>
+    const form = document.getElementById('metabolicForm');
+    const resultsDiv = document.getElementById('results');
+    const macronutrientsDiv = document.getElementById('macronutrients');
+    const historyDiv = document.getElementById('history');
+    const darkModeToggle = document.getElementById('darkModeToggle');
+    const languageSelect = document.getElementById('language');
+    let caloriesChart, macroChart, trendsChart;
+    const notyf = new Notyf();
 
-  <main class="container">
-    <form class="form" id="formulario" onsubmit="return calcular(event)">
-      <fieldset>
-        <div class="field-group">
-          <label for="genero">SEXO:</label>
-          <select name="genero" id="genero">
-            <option value="Feminino">Feminino</option>
-            <option value="Masculino">Masculino</option>
-          </select>
-        </div>
+    const nutritionInfo = {
+      'pt-BR': `
+        # Informações Nutricionais Importantes
 
-        <div class="field-group">
-          <label for="peso">PESO <small>(kg)</small>:</label>
-          <input type="number" name="peso" id="peso" step="0.01" min="0" size="4" autofocus required placeholder="70" />
-        </div>
+        Uma dieta equilibrada é essencial para manter uma boa saúde. Aqui estão algumas dicas importantes:
 
-        <div class="field-group">
-          <label for="altura">ALTURA <small>(cm)</small>:</label>
-          <input type="number" name="altura" id="altura" step="0.01" min="0" size="5" required placeholder="170" />
-        </div>
+        1. **Proteínas**: Importantes para construção muscular e reparação de tecidos.
+        2. **Carboidratos**: Fonte principal de energia para o corpo.
+        3. **Gorduras**: Necessárias para absorção de vitaminas e produção hormonal.
+        4. **Fibras**: Ajudam na digestão e promovem saciedade.
+        5. **Vitaminas e Minerais**: Essenciais para várias funções corporais.
 
-        <div class="field-group">
-          <label for="idade">IDADE <small>(anos)</small>:</label>
-          <input type="number" name="idade" id="idade" step="1.00" min="0" size="4" required placeholder="25" />
-        </div>
+        Lembre-se de consultar um nutricionista para uma dieta personalizada.
+      `,
+      'en-US': `
+        # Important Nutritional Information
 
-        <div class="field-btn">
-          <input type="submit" class="button" value="CALCULAR" />
-        </div>
-      </fieldset>
-    </form>
+        A balanced diet is essential for maintaining good health. Here are some important tips:
 
-    <div class="resultado-container" id="resultado">
-      <h2 class="result">
-        SEU RESULTADO:
-      </h2>
-      <div class="result-list" id="result-data" style="visibility: hidden">
-        <ul>
-          <li>Metabolismo Basal : <span id="metabolismo_basal" class="result-item"></span> cal</li>
-          <li>Sedentário controle remoto : <span id="sedentario" class="result-item"></span> cal</li>
-          <li>Exercício light : <span id="exercicio_leve" class="result-item"></span> cal</li>
-          <li>Exercício moderado: <span id="exercicio_moderado" class="result-item"></span> cal</li>
-          <li>Exercício regular : <span id="ativo" class="result-item"></span> cal</li>
-          <li>Exercício 2 horas por dia: <span id="super_ativo" class="result-item"></span> cal</li>
-        </ul>
+        1. **Proteins**: Important for muscle building and tissue repair.
+        2. **Carbohydrates**: Main source of energy for the body.
+        3. **Fats**: Necessary for vitamin absorption and hormone production.
+        4. **Fiber**: Helps with digestion and promotes satiety.
+        5. **Vitamins and Minerals**: Essential for various bodily functions.
 
-        <h3 class="x-padd">GANHAR PESO:</h3>
+        Remember to consult a nutritionist for a personalized diet.
+      `,
+      'it-IT': `
+        # Informazioni Nutrizionali Importanti
 
-        <p>
-          Para ganhar peso você deve consumir:
-          <span id="ganhar_peso" class="result-peso"></span> cal<small> (diariamente)</small>
-        </p>
+        Una dieta equilibrata è essenziale per mantenere una buona salute. Ecco alcuni consigli importanti:
 
-        <h3 class="x-padd">PERDER PESO:</h3>
+        1. **Proteine**: Importanti per la costruzione muscolare e la riparazione dei tessuti.
+        2. **Carboidrati**: Principale fonte di energia per il corpo.
+        3. **Grassi**: Necessari per l'assorbimento delle vitamine e la produzione di ormoni.
+        4. **Fibre**: Aiutano la digestione e promuovono la sazietà.
+        5. **Vitamine e Minerali**: Essenziali per varie funzioni corporee.
 
-        <p>
-          Para perder peso você deve consumir até:
-          <span id="perder_peso" class="result-peso"></span> cal
-        </p>
+        Ricorda di consultare un nutrizionista per una dieta personalizzata.
+      `,
+      'es-ES': `
+        # Información Nutricional Importante
 
-        <h3 class="x-padd">Dados IMC:</h3>
+        Una dieta equilibrada es esencial para mantener una buena salud. Aquí hay algunos consejos importantes:
 
-        <ul>
-          <li>IMC: <span id="imc"></span></li>
-          <li>Classificação: <span id="imc_classification"></span> </li>
-        </ul>
+        1. **Proteínas**: Importantes para la construcción muscular y la reparación de tejidos.
+        2. **Carbohidratos**: Fuente principal de energía para el cuerpo.
+        3. **Grasas**: Necesarias para la absorción de vitaminas y la producción de hormonas.
+        4. **Fibra**: Ayuda con la digestión y promueve la saciedad.
+        5. **Vitaminas y Minerales**: Esenciales para varias funciones corporales.
 
-      </div>
-    </div>
-  </main>
+        Recuerda consultar a un nutricionista para una dieta personalizada.
+      `
+    };
 
-  <footer>
-    <div class="rodape text-left">
-      <h4 class="text-center">REFERÊNCIAS</h4>
-      <ul>
-        <li>
-          <a href="https://github.com/adalbertobrant/metabolismobasal/graphs/contributors"><i
-              class="material-icons">article</i>Contribuidores
-          </a>
-        </li>
-        <li>
-          <a href="https://www.leighpeele.com/mifflin-st-jeor-calculator"><i class="material-icons">article</i>Como é
-            feito o cálculo</a>
-        </li>
-        <li>
-          <a href="https://www.scielo.br/pdf/abcd/v29n3/pt_0102-6720-abcd-29-03-00185.pdf"><i
-              class="material-icons">article</i>IMPORTÂNCIA DA EQUAÇÃO DE
-            HARRIS-BENEDICT
-          </a>
-        </li>
-      </ul>
-    </div>
-  </footer>
+    const translations = {
+      'pt-BR': {
+        title: 'Calculadora de Taxa Metabólica Avançada',
+        subtitle: 'Descubra sua taxa metabólica basal e muito mais!',
+        language: 'Idioma:',
+        darkMode: 'Modo Escuro',
+        personalData: 'Dados Pessoais',
+        gender: 'Sexo',
+        female: 'Feminino',
+        male: 'Masculino',
+        age: 'Idade',
+        weight: 'Peso (kg)',
+        height: 'Altura (cm)',
+        activityLevel: 'Nível de Atividade',
+        sedentary: 'Sedentário',
+        lightlyActive: 'Levemente Ativo',
+        moderatelyActive: 'Moderadamente Ativo',
+        veryActive: 'Muito Ativo',
+        extremelyActive: 'Extremamente Ativo',
+        calculate: 'Calcular',
+        results: 'Resultados',
+        fillForm: 'Preencha o formulário para ver seus resultados.',
+        macronutrients: 'Macronutrientes Recomendados',
+        calculateFirst: 'Calcule sua taxa metabólica para ver as recomendações de macronutrientes.',
+        history: 'Histórico de Cálculos',
+        noHistory: 'Seu histórico de cálculos aparecerá aqui.',
+        trends: 'Tendências e Previsões',
+        information: 'Informações Nutricionais',
+        bmr: 'Taxa Metabólica Basal (TMB):',
+        tdee: 'Gasto Energético Total Diário (TDEE):',
+        bmi: 'Índice de Massa Corporal (IMC):',
+        bmiClassification: 'Classificação IMC:',
+        protein: 'Proteínas:',
+        carbs: 'Carboidratos:',
+        fats: 'Gorduras:',
+        date: 'Data:',
+        underweight: 'Abaixo do peso',
+        normalWeight: 'Peso normal',
+        overweight: 'Sobrepeso',
+        obese: 'Obesidade'
+      },
+      'en-US': {
+        title: 'Advanced Metabolic Rate Calculator',
+        subtitle: 'Discover your basal metabolic rate and more!',
+        language: 'Language:',
+        darkMode: 'Dark Mode',
+        personalData: 'Personal Data',
+        gender: 'Gender',
+        female: 'Female',
+        male: 'Male',
+        age: 'Age',
+        weight: 'Weight (kg)',
+        height: 'Height (cm)',
+        activityLevel: 'Activity Level',
+        sedentary: 'Sedentary',
+        lightlyActive: 'Lightly Active',
+        moderatelyActive: 'Moderately Active',
+        veryActive: 'Very Active',
+        extremelyActive: 'Extremely Active',
+        calculate: 'Calculate',
+        results: 'Results',
+        fillForm: 'Fill out the form to see your results.',
+        macronutrients: 'Recommended Macronutrients',
+        calculateFirst: 'Calculate your metabolic rate to see macronutrient recommendations.',
+        history: 'Calculation History',
+        noHistory: 'Your calculation history will appear here.',
+        trends: 'Trends and Predictions',
+        information: 'Nutritional Information',
+        bmr: 'Basal Metabolic Rate (BMR):',
+        tdee: 'Total Daily Energy Expenditure (TDEE):',
+        bmi: 'Body Mass Index (BMI):',
+        bmiClassification: 'BMI Classification:',
+        protein: 'Protein:',
+        carbs: 'Carbohydrates:',
+        fats: 'Fats:',
+        date: 'Date:',
+        underweight: 'Underweight',
+        normalWeight: 'Normal weight',
+        overweight: 'Overweight',
+        obese: 'Obese'
+      },
+      'it-IT': {
+        title: 'Calcolatore Avanzato del Tasso Metabolico',
+        subtitle: 'Scopri il tuo tasso metabolico basale e altro!',
+        language: 'Lingua:',
+        darkMode: 'Modalità Scura',
+        personalData: 'Dati Personali',
+        gender: 'Sesso',
+        female: 'Femmina',
+        male: 'Maschio',
+        age: 'Età',
+        weight: 'Peso (kg)',
+        height: 'Altezza (cm)',
+        activityLevel: 'Livello di Attività',
+        sedentary: 'Sedentario',
+        lightlyActive: 'Leggermente Attivo',
+        moderatelyActive: 'Moderatamente Attivo',
+        veryActive: 'Molto Attivo',
+        extremelyActive: 'Estremamente Attivo',
+        calculate: 'Calcola',
+        results: 'Risultati',
+        fillForm: 'Compila il modulo per vedere i tuoi risultati.',
+        macronutrients: 'Macronutrienti Raccomandati',
+        calculateFirst: 'Calcola il tuo tasso metabolico per vedere le raccomandazioni sui macronutrienti.',
+        history: 'Cronologia dei Calcoli',
+        noHistory: 'La tua cronologia dei calcoli apparirà qui.',
+        trends: 'Tendenze e Previsioni',
+        information: 'Informazioni Nutrizionali',
+        bmr: 'Tasso Metabolico Basale (TMB):',
+        tdee: 'Dispendio Energetico Totale Giornaliero (TDEE):',
+        bmi: 'Indice di Massa Corporea (IMC):',
+        bmiClassification: 'Classificazione IMC:',
+        protein: 'Proteine:',
+        carbs: 'Carboidrati:',
+        fats: 'Grassi:',
+        date: 'Data:',
+        underweight: 'Sottopeso',
+        normalWeight: 'Peso normale',
+        overweight: 'Sovrappeso',
+        obese: 'Obeso'
+      },
+      'es-ES': {
+        title: 'Calculadora Avanzada de Tasa Metabólica',
+        subtitle: '¡Descubre tu tasa metabólica basal y más!',
+        language: 'Idioma:',
+        darkMode: 'Modo Oscuro',
+        personalData: 'Datos Personales',
+        gender: 'Sexo',
+        female: 'Femenino',
+        male: 'Masculino',
+        age: 'Edad',
+        weight: 'Peso (kg)',
+        height: 'Altura (cm)',
+        activityLevel: 'Nivel de Actividad',
+        sedentary: 'Sedentario',
+        lightlyActive: 'Ligeramente Activo',
+        moderatelyActive: 'Moderadamente Activo',
+        veryActive: 'Muy Activo',
+        extremelyActive: 'Extremadamente Activo',
+        calculate: 'Calcular',
+        results: 'Resultados',
+        fillForm: 'Completa el formulario para ver tus resultados.',
+        macronutrients: 'Macronutrientes Recomendados',
+        calculateFirst: 'Calcula tu tasa metabólica para ver las recomendaciones de macronutrientes.',
+        history: 'Historial de Cálculos',
+        noHistory: 'Tu historial de cálculos aparecerá aquí.',
+        trends: 'Tendencias y Predicciones',
+        information: 'Información Nutricional',
+        bmr: 'Tasa Metabólica Basal (TMB):',
+        tdee: 'Gasto Energético Total Diario (TDEE):',
+        bmi: 'Índice de Masa Corporal (IMC):',
+        bmiClassification: 'Clasificación IMC:',
+        protein: 'Proteínas:',
+        carbs: 'Carbohidratos:',
+        fats: 'Grasas:',
+        date: 'Fecha:',
+        underweight: 'Bajo peso',
+        normalWeight: 'Peso normal',
+        overweight: 'Sobrepeso',
+        obese: 'Obesidad'
+      }
+    };
+
+    function updateLanguage(lang) {
+      document.querySelectorAll('[data-i18n]').forEach(elem => {
+        const key = elem.getAttribute('data-i18n');
+        elem.textContent = translations[lang][key] || key;
+      });
+      document.getElementById('nutritionInfo').innerHTML = marked.parse(nutritionInfo[lang]);
+    }
+
+    languageSelect.addEventListener('change', (e) => {
+      updateLanguage(e.target.value);
+    });
+
+    darkModeToggle.addEventListener('click', () => {
+      document.body.classList.toggle('dark');
+      const isDarkMode = document.body.classList.contains('dark');
+      darkModeToggle.innerHTML = `<span class="mdi ${isDarkMode ? 'mdi-weather-sunny' : 'mdi-weather-night'}"></span> ${isDarkMode ? translations[languageSelect.value].lightMode : translations[languageSelect.value].darkMode}`;
+    });
+
+    form.addEventListener('submit', function(e) {
+      e.preventDefault();
+      const gender = document.getElementById('gender').value;
+      const age = parseInt(document.getElementById('age').value);
+      const weight = parseFloat(document.getElementById('weight').value);
+      const height = parseInt(document.getElementById('height').value);
+      const activityLevel = parseFloat(document.getElementById('activityLevel').value);
+
+      const bmr = calculateBMR(gender, age, weight, height);
+      const tdee = calculateTDEE(bmr, activityLevel);
+      const bmi = calculateBMI(weight, height);
+      const macros = calculateMacros(tdee);
+
+      displayResults(bmr, tdee, bmi);
+      displayMacronutrients(macros);
+      updateCaloriesChart(bmr, tdee);
+      updateMacroChart(macros);
+      addToHistory(gender, age, weight, height, activityLevel, bmr, tdee, bmi);
+      updateTrendsChart();
+
+      notyf.success(translations[languageSelect.value].calculationSuccess);
+    });
+
+    function calculateBMR(gender, age, weight, height) {
+      if (gender === 'male') {
+        return 88.362 + (13.397 * weight) + (4.799 * height) - (5.677 * age);
+      } else {
+        return 447.593 + (9.247 * weight) + (3.098 * height) - (4.330 * age);
+      }
+    }
+
+    function calculateTDEE(bmr, activityLevel) {
+      return bmr * activityLevel;
+    }
+
+    function calculateBMI(weight, height) {
+      const heightInMeters = height / 100;
+      return weight / (heightInMeters * heightInMeters);
+    }
+
+    function calculateMacros(tdee) {
+      const protein = (tdee * 0.3) / 4;
+      const carbs = (tdee * 0.4) / 4;
+      const fats = (tdee * 0.3) / 9;
+      return { protein, carbs, fats };
+    }
+
+    function displayResults(bmr, tdee, bmi) {
+      const lang = languageSelect.value;
+      resultsDiv.innerHTML = `
+        <p class="font-semibold">${translations[lang].bmr} <span class="text-indigo-600">${Math.round(bmr)} ${translations[lang].calories}/day</span></p>
+        <p class="font-semibold">${translations[lang].tdee} <span class="text-indigo-600">${Math.round(tdee)} ${translations[lang].calories}/day</span></p>
+        <p class="font-semibold">${translations[lang].bmi} <span class="text-indigo-600">${bmi.toFixed(1)}</span></p>
+        <p class="font-semibold">${translations[lang].bmiClassification} <span class="text-indigo-600">${getBMIClassification(bmi, lang)}</span></p>
+      `;
+    }
+
+    function displayMacronutrients(macros) {
+      const lang = languageSelect.value;
+      macronutrientsDiv.innerHTML = `
+        <p class="font-semibold">${translations[lang].protein} <span class="text-indigo-600">${Math.round(macros.protein)}g</span></p>
+        <p class="font-semibold">${translations[lang].carbs} <span class="text-indigo-600">${Math.round(macros.carbs)}g</span></p>
+        <p class="font-semibold">${translations[lang].fats} <span class="text-indigo-600">${Math.round(macros.fats)}g</span></p>
+      `;
+    }
+
+    function getBMIClassification(bmi, lang) {
+      if (bmi < 18.5) return translations[lang].underweight;
+      if (bmi < 25) return translations[lang].normalWeight;
+      if (bmi < 30) return translations[lang].overweight;
+      return translations[lang].obese;
+    }
+
+    function updateCaloriesChart(bmr, tdee) {
+      const ctx = document.getElementById('caloriesChart').getContext('2d');
+      const lang = languageSelect.value;
+      
+      if (caloriesChart) {
+        caloriesChart.destroy();
+      }
+
+      caloriesChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: ['BMR', 'TDEE'],
+          datasets: [{
+            label: translations[lang].calories,
+            data: [bmr, tdee],
+            backgroundColor: ['rgba(99, 102, 241, 0.5)', 'rgba(79, 70, 229, 0.5)'],
+            borderColor: ['rgba(99, 102, 241, 1)', 'rgba(79, 70, 229, 1)'],
+            borderWidth: 1
+          }]
+        },
+        options: {
+          responsive: true,
+          scales: {
+            y: {
+              beginAtZero: true
+            }
+          }
+        }
+      });
+    }
+
+    function updateMacroChart(macros) {
+      const lang = languageSelect.value;
+      
+      if (macroChart) {
+        macroChart.destroy();
+      }
+
+      macroChart = new ApexCharts(document.querySelector("#macroChart"), {
+        series: [Math.round(macros.protein), Math.round(macros.carbs), Math.round(macros.fats)],
+        chart: {
+          type: 'donut',
+        },
+        labels: [translations[lang].protein, translations[lang].carbs, translations[lang].fats],
+        responsive: [{
+          breakpoint: 480,
+          options: {
+            chart: {
+              width: 200
+            },
+            legend: {
+              position: 'bottom'
+            }
+          }
+        }]
+      });
+
+      macroChart.render();
+    }
+
+    function addToHistory(gender, age, weight, height, activityLevel, bmr, tdee, bmi) {
+      const historyItem = document.createElement('div');
+      historyItem.className = 'bg-gray-100 p-4 rounded-md mb-4';
+      const lang = languageSelect.value;
+      historyItem.innerHTML = `
+        <p class="font-semibold">${translations[lang].date} <span class="text-indigo-600">${luxon.DateTime.now().toLocaleString()}</span></p>
+        <p>BMR: ${Math.round(bmr)} cal | TDEE: ${Math.round(tdee)} cal | BMI: ${bmi.toFixed(1)}</p>
+      `;
+      historyDiv.insertBefore(historyItem, historyDiv.firstChild);
+
+      // Save to local storage
+      const history = JSON.parse(localStorage.getItem('metabolicHistory') || '[]');
+      history.push({ date: new Date(), bmr, tdee, bmi });
+      localStorage.setItem('metabolicHistory', JSON.stringify(history));
+    }
+
+    function updateTrendsChart() {
+      const history = JSON.parse(localStorage.getItem('metabolicHistory') || '[]');
+      const dates = history.map(item => new Date(item.date).toLocaleDateString());
+      const bmrData = history.map(item => item.bmr);
+      const tdeeData = history.map(item => item.tdee);
+
+      if (trendsChart) {
+        trendsChart.destroy();
+      }
+
+      trendsChart = new ApexCharts(document.querySelector("#trendsChart"), {
+        series: [{
+          name: 'BMR',
+          data: bmrData
+        }, {
+          name: 'TDEE',
+          data: tdeeData
+        }],
+        chart: {
+          height: 350,
+          type: 'line',
+          zoom: {
+            enabled: false
+          }
+        },
+        dataLabels: {
+          enabled: false
+        },
+        stroke: {
+          curve: 'straight'
+        },
+        title: {
+          text: 'Trends over time',
+          align: 'left'
+        },
+        grid: {
+          row: {
+            colors: ['#f3f3f3', 'transparent'],
+            opacity: 0.5
+          },
+        },
+        xaxis: {
+          categories: dates,
+        }
+      });
+
+      trendsChart.render();
+    }
+
+    // Initialize language
+    updateLanguage(languageSelect.value);
+
+    // Initialize nutritional information
+    document.getElementById('nutritionInfo').innerHTML = marked.parse(nutritionInfo[languageSelect.value]);
+
+    // Load history from local storage
+    const savedHistory = JSON.parse(localStorage.getItem('metabolicHistory') || '[]');
+    savedHistory.forEach(item => {
+      const historyItem = document.createElement('div');
+      historyItem.className = 'bg-gray-100 p-4 rounded-md mb-4';
+      const lang = languageSelect.value;
+      historyItem.innerHTML = `
+        <p class="font-semibold">${translations[lang].date} <span class="text-indigo-600">${new Date(item.date).toLocaleString()}</span></p>
+        <p>BMR: ${Math.round(item.bmr)} cal | TDEE: ${Math.round(item.tdee)} cal | BMI: ${item.bmi.toFixed(1)}</p>
+      `;
+      historyDiv.appendChild(historyItem);
+    });
+
+    // Initialize trends chart
+    updateTrendsChart();
+
+  </script>
 </body>
-
 </html>
